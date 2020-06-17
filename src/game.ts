@@ -1,5 +1,7 @@
 import 'phaser';
 
+import TestScene from './scenes/TestScene';
+
 export default class Demo extends Phaser.Scene
 {
     constructor ()
@@ -41,7 +43,7 @@ const config = {
     backgroundColor: '#125555',
     width: 800,
     height: 600,
-    scene: Demo
+    scene: TestScene
 };
 
 const game = new Phaser.Game(config);
