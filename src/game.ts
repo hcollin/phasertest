@@ -32,11 +32,12 @@ import TestScene from './scenes/TestScene';
 // }
 
 let w = 1440;
-const config = {
+const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     backgroundColor: '#125555',
     width: w,
     height: Math.round(w / 1.7777777),
+    parent: "gameContainer",
     physics: {
         default: 'matter',
         matter: {
@@ -60,3 +61,5 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
+
+

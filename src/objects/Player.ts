@@ -1,17 +1,17 @@
 import { GameObject } from "../interfaces/GameObject";
 import ShapeOne from "./polygons/ShapeOne";
 import ShapeTwo from "./polygons/ShapeTwo";
+import ShapeThree from "./polygons/ShapeThree";
+
+import { playerData} from '../data/player';
 
 export default function Player(): GameObject {
     let playerSprite;
-    let shapes: Phaser.Types.Physics.Matter.MatterBody[] = [];
-    let currentShape: number = 0;
+    let shapes: ((scene: Phaser.Scene, x: number, y: number) => Phaser.Types.Physics.Matter.MatterBody)[] = [];
+    
     let cursor: Phaser.Types.Input.Keyboard.CursorKeys;
 
     let keyW, keyS, keyA, keyD;
-
-    let w: number;
-    let h: number;
 
     const speed: number = 5;
 
@@ -20,21 +20,24 @@ export default function Player(): GameObject {
     }
 
     function create(scene: Phaser.Scene) {
-        
 
         shapes.push(
-            ShapeOne(scene, -200, -200)
-            // ShapeTwo(scene, -200, -200)
+            ShapeOne,
+            ShapeTwo,
+            ShapeThree,
         );
 
-        // playerSprite = (shapes[currentShape] as Phaser.GameObjects.GameObject).setInteractive();
-        playerSprite = scene.matter.add.image(100, 100, "player");    
+        playerSprite = shapes[playerData.shapeno](scene, 100, scene.sys.canvas.height/2);
+        // playerSprite = scene.matter.add.image(100, 100, "player");    
 
-        
+        playerSprite.x = 100;
+        playerSprite.y = scene.sys.canvas.height/2;
+        playerSprite.onCollide = true;
+        playerSprite.name = "PLAYER";
 
-        // playerSprite = ShapeOne(scene, 800, 400);
+        // playerSprite = ShapeTwo(scene, 800, 400);
 
-        playerSprite.cursor = scene.input.keyboard.createCursorKeys();
+        cursor = scene.input.keyboard.createCursorKeys();
         // if (playerSprite) {
         //     // playerSprite.setCollideWorldBounds(true);
 
@@ -48,6 +51,42 @@ export default function Player(): GameObject {
         keyS = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
         keyA = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
         keyD = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+
+        scene.input.keyboard.on("keyup-W", () => {
+            playerData.shapeno++;
+            if (playerData.shapeno >= shapes.length) playerData.shapeno = 0;
+            replacePlayerSpite(scene);
+        });
+
+        scene.input.keyboard.on("keyup-S", () => {
+            playerData.shapeno--;
+            if (playerData.shapeno < 0) playerData.shapeno = shapes.length - 1;
+            replacePlayerSpite(scene);
+        });
+
+        scene.matter.world.on('collisionactive', (e, ba, bb) => {
+            
+            if(ba.gameObject?.name === "PLAYER" || bb.gameObject?.name === "PLAYER") {
+                playerData.health--;
+                if(playerData.health <= 0) {
+                    console.log("DEATH!");
+                    scene.scene.stop();
+                    
+                }
+            }
+        });
+
+    }
+
+    function replacePlayerSpite(scene: Phaser.Scene) {
+        const nowx = playerSprite.x;
+        const nowy = playerSprite.y;
+        const nowa = playerSprite.angle;
+        playerSprite.destroy();
+        playerSprite = shapes[playerData.shapeno](scene, nowx, nowy);
+        playerSprite.angle = nowa;
+        playerSprite.onCollide = true;
+        playerSprite.name = "PLAYER";
     }
 
     function update(scene: Phaser.Scene) {
@@ -77,6 +116,9 @@ export default function Player(): GameObject {
         if (keyD.isDown) {
             playerSprite.setAngularVelocity(-0.1);
         }
+
+
+
     }
 
     return {
