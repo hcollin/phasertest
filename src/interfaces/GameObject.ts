@@ -1,9 +1,10 @@
 
 import 'phaser';
+import { GameLevelSceneInterface } from '../scenes/GameLevelScene';
 
 export interface GameObject {
-    preload(scene: Phaser.Scene): void;
-    create(scene:Phaser.Scene): void;
-    update(scene:Phaser.Scene, player?: Phaser.GameObjects.GameObject): void;
+    preload(scene: GameLevelSceneInterface): void;
+    create(scene: GameLevelSceneInterface): void;
+    update(scene:GameLevelSceneInterface, player?: Phaser.GameObjects.GameObject): void;
     obj?: Phaser.GameObjects.GameObject;
 }

@@ -1,4 +1,5 @@
 import { GameObject } from "../../interfaces/GameObject";
+import { GameLevelSceneInterface } from "../../interfaces/Level";
 
 export interface WallConfig {
     x: number,
@@ -12,8 +13,8 @@ export default function Wall(conf: WallConfig): GameObject {
     let wall: MatterJS.BodyType;
     let rect: Phaser.GameObjects.Rectangle;
 
-    function preload(scene: Phaser.Scene) { }
-    function create(scene: Phaser.Scene) {
+    function preload(scene: GameLevelSceneInterface) { }
+    function create(scene: GameLevelSceneInterface) {
 
         rect = scene.add.rectangle(conf.x, conf.y, conf.width || 20 , conf.height, 0x998877);
         
@@ -25,9 +26,7 @@ export default function Wall(conf: WallConfig): GameObject {
         
 
     }
-    function update(scene: Phaser.Scene) {
-        // wall.setVelocity(0);
-    }
+    function update(scene: GameLevelSceneInterface) {}
 
     return {
         preload,

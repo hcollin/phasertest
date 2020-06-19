@@ -1,124 +1,176 @@
 import { GameObject } from "../interfaces/GameObject";
-import ShapeOne from "./polygons/ShapeOne";
-import ShapeTwo from "./polygons/ShapeTwo";
-import ShapeThree from "./polygons/ShapeThree";
-
-import { playerData} from '../data/player';
+import { playerData } from '../data/playerData';
+import { PlayerShape, createPlayerShape } from "./polygons/PlayerShape";
+import { GameLevelSceneInterface } from "../interfaces/Level";
+import endLevel from "../utils/endLevel";
 
 export default function Player(): GameObject {
     let playerSprite;
-    let shapes: ((scene: Phaser.Scene, x: number, y: number) => Phaser.Types.Physics.Matter.MatterBody)[] = [];
-    
+    let shapes: PlayerShape[] = playerData.shapes;
+
     let cursor: Phaser.Types.Input.Keyboard.CursorKeys;
 
     let keyW, keyS, keyA, keyD;
 
     const speed: number = 5;
 
-    function preload(scene: Phaser.Scene) {
-        scene.load.image("player", "assets/blocky.png");
+    let destroyed = false;
+
+    function preload(scene: GameLevelSceneInterface) {
+        
+        scene.load.atlas("Explosion", "assets/atlasses/Explosion.png","assets/atlasses/Explosion.json")
+
     }
 
-    function create(scene: Phaser.Scene) {
+    function create(scene: GameLevelSceneInterface) {
 
-        shapes.push(
-            ShapeOne,
-            ShapeTwo,
-            ShapeThree,
-        );
 
-        playerSprite = shapes[playerData.shapeno](scene, 100, scene.sys.canvas.height/2);
-        // playerSprite = scene.matter.add.image(100, 100, "player");    
-
-        playerSprite.x = 100;
-        playerSprite.y = scene.sys.canvas.height/2;
+        changePlayerShape(scene, 100, scene.sys.canvas.height / 2, 0);
+       
         playerSprite.onCollide = true;
         playerSprite.name = "PLAYER";
+        
 
-        // playerSprite = ShapeTwo(scene, 800, 400);
-
+        destroyed = false;
         cursor = scene.input.keyboard.createCursorKeys();
-        // if (playerSprite) {
-        //     // playerSprite.setCollideWorldBounds(true);
 
-        //     w = playerSprite.width;
-        //     h = playerSprite.height;
-        //     playerSprite.setFixedRotation();
-        //     playerSprite.setInteractive();
-        // }
-
-        keyW = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
-        keyS = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        // keyW = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        // keyS = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
         keyA = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
         keyD = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
 
         scene.input.keyboard.on("keyup-W", () => {
-            playerData.shapeno++;
-            if (playerData.shapeno >= shapes.length) playerData.shapeno = 0;
-            replacePlayerSpite(scene);
+            playerData.nextShape();
+            changePlayerShape(scene);
         });
 
         scene.input.keyboard.on("keyup-S", () => {
-            playerData.shapeno--;
-            if (playerData.shapeno < 0) playerData.shapeno = shapes.length - 1;
-            replacePlayerSpite(scene);
+            playerData.prevShape();
+            changePlayerShape(scene);
         });
 
-        scene.matter.world.on('collisionactive', (e, ba, bb) => {
-            
-            if(ba.gameObject?.name === "PLAYER" || bb.gameObject?.name === "PLAYER") {
-                playerData.health--;
-                if(playerData.health <= 0) {
-                    console.log("DEATH!");
-                    scene.scene.stop();
-                    
+        scene.matter.world.on('collisionactive', (e: Phaser.Physics.Matter.Events.CollisionActiveEvent, ba: MatterJS.BodyType, bb: MatterJS.BodyType) => {
+
+            const playerobj: MatterJS.BodyType | null = ba.gameObject?.name === "PLAYER" ? ba : bb.gameObject?.name === "PLAYER" ? bb : null;
+            const diamond: MatterJS.BodyType | null = ba.gameObject?.type === "DIAMOND" ? ba : bb.gameObject?.type === "DIAMOND" ? bb : null;
+
+            if (playerobj !== null && diamond === null) {
+                const status = playerData.getStatus();
+                
+                
+                if(status.health > 0) {
+                    const alive = playerData.setDamage(1);
+                    if (!alive) {
+                        console.log("DEATH!");
+                        playerData.death();
+                        scene.cameras.main.centerOnX(playerSprite.x);
+                        deathAnimation(scene);   
+                    }
                 }
+                
             }
+
+
         });
 
     }
 
-    function replacePlayerSpite(scene: Phaser.Scene) {
-        const nowx = playerSprite.x;
-        const nowy = playerSprite.y;
-        const nowa = playerSprite.angle;
-        playerSprite.destroy();
-        playerSprite = shapes[playerData.shapeno](scene, nowx, nowy);
+    function changePlayerShape(scene: Phaser.Scene, x?: number, y?: number, a?: number) {
+        const nowx = x !== undefined ? x : playerSprite.x;
+        const nowy = y !== undefined ? y : playerSprite.y;
+        const nowa = a !== undefined ? a : playerSprite.angle;
+        if (playerSprite) {
+            playerSprite.destroy();
+        }
+
+        playerSprite = createPlayerShape(scene, playerData.getShape(), nowx, nowy);
         playerSprite.angle = nowa;
         playerSprite.onCollide = true;
         playerSprite.name = "PLAYER";
     }
 
-    function update(scene: Phaser.Scene) {
-        playerSprite.setVelocity(0);
+    function deathAnimation(scene: Phaser.Scene) {
+        
+        scene.anims.create({ key: 'fullExplosion', frames: scene.anims.generateFrameNames('Explosion'), repeat: 0, hideOnComplete: true });
+        
+        let explosions = [];
 
+        const px = playerSprite.x;
+        const py = playerSprite.y;
+        const max = 12;
+        let done = 0;
+        let opacityPart = 1 / max;
+        for(let e = 0; e < max; e++) {
+            const sc = ((Math.round(Math.random()*15))/10) +0.5;
+            setTimeout(() => {
+                const x = px - (Math.round(Math.random()* 80) - 40);
+                const y = py - (Math.round(Math.random()* 80) - 40);
+                const exp = scene.add.sprite(x, y, "Explosion").setScale(sc).play("fullExplosion");
+                exp.once("animationcomplete", () => {
+                    exp.destroy();
+                    done++;
+                    // if(done === max / 2) {
+                    //     playerSprite.setVisible(false);
+                    // }
+                    playerSprite.setAlpha( 1 - (done * opacityPart));
+                    if(done === max) {
+                        console.log("Explosion done!");
+                        destroyed = true;
+                        playerSprite.destroy();
+                        setTimeout(() => {
+                            endLevel(scene);
+                        }, 1000);
+                        
+                    }
+                })
+            }, 120 * sc * e);
+            
+            
+            
+        }
+        
+
+        
+        // const exp1 = scene.sprite.add.sprite(config.x, config.y, "CrystalBall", null, { isSensor: true, ignoreGravity: true });
+    }   
+
+    function update(scene: GameLevelSceneInterface) {
+
+        const status = playerData.getStatus();
+        const pShape = playerData.getShape();
+
+        if(destroyed) return;
+        playerSprite.setVelocity(0);
         playerSprite.setAngularVelocity(0);
         // // console.log(scene.cameras.main.scrollX, playerSprite.x);
 
-        playerSprite.setVelocityX(1);
+        if(status.alive) {
+            playerSprite.setVelocityX(pShape.cameraSpeed);
+            
+            if (cursor.left.isDown) {
+                playerSprite.setVelocityX((pShape.acceleration * -1) + pShape.cameraSpeed);
+            } else if (cursor.right.isDown) {
+                playerSprite.setVelocityX((pShape.acceleration));
+            }
+    
+            if (cursor.up.isDown) {
+                playerSprite.setVelocityY(pShape.acceleration * -1);
+            } else if (cursor.down.isDown) {
+                playerSprite.setVelocityY(pShape.acceleration);
+            }
+    
+            if (keyA.isDown) {
+                playerSprite.setAngularVelocity(pShape.rotationSpeed);
+            }
+    
+            if (keyD.isDown) {
+                playerSprite.setAngularVelocity(pShape.rotationSpeed * -1);
+            }
 
-        if (cursor.left.isDown) {
-            playerSprite.setVelocityX(speed * -1);
-        } else if (cursor.right.isDown) {
-            playerSprite.setVelocityX(speed);
+            playerData.xPos = playerSprite.x;
         }
-
-        if (cursor.up.isDown) {
-            playerSprite.setVelocityY(speed * -1);
-        } else if (cursor.down.isDown) {
-            playerSprite.setVelocityY(speed);
-        }
-
-        if (keyA.isDown) {
-            playerSprite.setAngularVelocity(0.1);
-        }
-
-        if (keyD.isDown) {
-            playerSprite.setAngularVelocity(-0.1);
-        }
-
-
-
+        
+        
     }
 
     return {
