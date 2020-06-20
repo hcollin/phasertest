@@ -24,7 +24,6 @@ export default function Player(): GameObject {
 
     function create(scene: GameLevelSceneInterface) {
 
-
         changePlayerShape(scene, 100, scene.sys.canvas.height / 2, 0);
        
         playerSprite.onCollide = true;
@@ -49,6 +48,8 @@ export default function Player(): GameObject {
             changePlayerShape(scene);
         });
 
+        
+
         scene.matter.world.on('collisionactive', (e: Phaser.Physics.Matter.Events.CollisionActiveEvent, ba: MatterJS.BodyType, bb: MatterJS.BodyType) => {
 
             const playerobj: MatterJS.BodyType | null = ba.gameObject?.name === "PLAYER" ? ba : bb.gameObject?.name === "PLAYER" ? bb : null;
@@ -57,8 +58,8 @@ export default function Player(): GameObject {
             if (playerobj !== null && diamond === null) {
                 const status = playerData.getStatus();
                 
-                
                 if(status.health > 0) {
+                    console.log("COLLISION", status.health, "\nNames: ", ba.gameObject?.name, bb.gameObject?.name, "\nTypes:", ba.gameObject?.type, bb.gameObject?.type);
                     const alive = playerData.setDamage(1);
                     if (!alive) {
                         console.log("DEATH!");
@@ -114,7 +115,6 @@ export default function Player(): GameObject {
                     // }
                     playerSprite.setAlpha( 1 - (done * opacityPart));
                     if(done === max) {
-                        console.log("Explosion done!");
                         destroyed = true;
                         playerSprite.destroy();
                         setTimeout(() => {

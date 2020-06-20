@@ -1,6 +1,6 @@
 
 import 'phaser';
-import { GameLevelSceneInterface } from '../scenes/GameLevelScene';
+import { GameLevelSceneInterface } from './Level';
 
 export interface GameObject {
     preload(scene: GameLevelSceneInterface): void;

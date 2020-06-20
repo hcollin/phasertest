@@ -9,7 +9,8 @@ import Wall from '../objects/obstacles/Wall';
 import { playerData } from '../data/playerData';
 import Diamond from '../objects/Diamond';
 import Points from '../objects/Points';
-import { GameLevelSceneSettings, GameLevelSceneInterface } from '../interfaces/Level';
+import { GameLevelSceneSettings, GameLevelSceneInterface, LevelObject } from '../interfaces/Level';
+import BallCircle, { BallCircleConfig } from '../objects/obstacles/BallCircle';
 
 
 
@@ -73,6 +74,17 @@ export default class GameLevelScene extends Phaser.Scene implements GameLevelSce
             const dia = Diamond(dconf);
             dia.preload(this);
             this.mySceneObjects.push(dia);
+        });
+
+        this.settings.objects.forEach((obj: LevelObject) => {
+            switch(obj.type) {
+                case "BallCircle":
+                    const bc= BallCircle(obj.configs as BallCircleConfig);
+                    bc.preload(this);
+                    this.mySceneObjects.push(bc);
+                    break;
+
+            }
         });
 
         const points = Points();

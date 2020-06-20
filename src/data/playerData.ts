@@ -88,6 +88,7 @@ function createPlayer(): PlayerData {
     }
 
     function setDamage(damageTaken=1) {
+        
         health -= damageTaken;
         return health > 0;
     }

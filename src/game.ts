@@ -15,16 +15,16 @@ const config: Phaser.Types.Core.GameConfig = {
     physics: {
         default: 'matter',
         matter: {
-            // debug: {
-            //     showBody: true,
-            //     showStaticBody: true,
+            debug: {
+                showBody: true,
+                showStaticBody: true,
 
-            //     showBounds: false,
+                showBounds: false,
                 
                 
-            //     showCollisions: true,
+                showCollisions: true,
                 
-            // },
+            },
             gravity: {
                 x: 0,
                 y: 0,

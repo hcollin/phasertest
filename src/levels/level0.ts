@@ -11,7 +11,13 @@ export const levelZero: GameLevelSceneSettings = {
         { x: 700, y: 490, height: 800 },
         { x: 1000, y: 90, height: 20, width: 600 },
     ],
-    finishLine: 2000,
+    objects: [
+        {
+            type: "BallCircle",
+            configs: {x: 2000, y: 400, distance: 200, balls: 8}
+        }
+    ],
+    finishLine: 3000,
     startX: 100,
     startY: 400,
     backgroundImage: "assets/stars.jpg",
