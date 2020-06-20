@@ -19,6 +19,7 @@ export default function Player(): GameObject {
     function preload(scene: GameLevelSceneInterface) {
         
         scene.load.atlas("Explosion", "assets/atlasses/Explosion.png","assets/atlasses/Explosion.json")
+        scene.load.image("PlayerBlock","assets/sprites/playerTile.png");
 
     }
 
@@ -47,6 +48,7 @@ export default function Player(): GameObject {
             playerData.prevShape();
             changePlayerShape(scene);
         });
+
 
         
 

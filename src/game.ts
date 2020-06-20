@@ -3,6 +3,8 @@ import 'phaser';
 import LevelSelectorScene from './scenes/LevelSelector';
 import LoadingScreen from './scenes/LoadingScreen';
 import TestScene from './scenes/TestScene';
+import { LEVEL_TestLevel } from './levels/testLevel';
+import LevelScene from './scenes/LevelScene';
 
 let w = 1440;
 const config: Phaser.Types.Core.GameConfig = {
@@ -31,12 +33,14 @@ const config: Phaser.Types.Core.GameConfig = {
             }
         }
     },
-    scene: [LoadingScreen, LevelSelectorScene]
+    // scene: [LoadingScreen, LevelSelectorScene]
     // scene: TestScene
 };
 
 
-
 const game = new Phaser.Game(config);
+
+game.scene.add(LEVEL_TestLevel.id, LevelScene, true, LEVEL_TestLevel);
+
 
 
