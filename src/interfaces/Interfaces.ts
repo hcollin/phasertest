@@ -8,9 +8,8 @@
 export interface GeneralObject {
 
     myType: GameObjectTypes;
-
     
-    update: (scene: Phaser.Scene, time?: number, delta?: number) => void;
+    update: (scene: LevelSceneInterface, time?: number, delta?: number) => void;
 }
 
 
@@ -47,13 +46,22 @@ export enum GameObjectTypes {
 
 export interface PlayerObject extends GeneralObject {
     myType: GameObjectTypes.PLAYER;
+    shape: PlayerShapeObject;
+    
+    create: (scene: LevelSceneInterface) => void;
+    
+    getStatus: () => PlayerLevelStatus;
+    action: (direction: string, scene: LevelSceneInterface) => void;
+}
 
+export interface PlayerLevelStatus {
+    health: number;
     shape: PlayerShapeObject;
 }
 
 export interface PlayerShapeObject {
-    collisionPolygon: Phaser.Geom.Polygon;
-    sprite: Phaser.Physics.Matter.Sprite;
+    collisionPolygon: Phaser.Math.Vector2[];
+    spriteId: string;
     rotationVelocity: number;
     movementVelocity: number;
     cameraSpeed: number;
@@ -73,16 +81,18 @@ export interface LevelConfiguration {
     objects: GeneralObject[];
     assets: AssetConfiguration[];
     backgroundMusic: string;
+
     backgroundImages: BackgroundImageConfiguration[];
 }
 
 
 export interface BackgroundImageConfiguration {
-    id: string;
-    filename: string;
+    assetId: string;
     speed: number;
     opacity: number;
+    depth: DEPTHLEVEL;
     tint?: number;
+    
 }
 
 export enum AssetType {
@@ -112,18 +122,61 @@ export interface AtlasAssetConfiguration extends AssetConfiguration {
 
 
 
+export enum DEPTHLEVEL {
+    BG_BASE = 0,
+    BG_LOW = 1,
+    BG_MIDDLE = 2,
+    BG_HIGH = 4,
+    TILES = 10,
+    PLAYER = 15,
+    OBJECTS_STATIC = 20,
+    OBJECTS_MOVING = 30,
+    BOOSTERS = 30,
+    
+    BG_TOP_1 = 50,
+    BG_TOP_2 = 55,
+
+    GUI_BG = 70,
+    GUI_VALUES = 75,
+
+    MESSAGE = 90,
+}
+
+// Background scroller
+export interface BackgroundImage {
+    create: (scene: LevelSceneInterface) => void;
+    update: (scene: LevelSceneInterface, time?: number, delta?: number) => void;
+    pause: () => void;
+    resume: () => void;
+
+}
+
+
+export enum LEVELSTATUS {
+    INIT = "Init",
+    LOAD = "Loading",
+    READY = "Ready",
+    RUN = "Running",
+    PAUSED = "Paused",  // Pause the whole progress of the game
+    HOLD = "Hold",      // Stop just the camera
+    END = "Ended",
+}
+
+
 // Scene types and substypes
 export interface LevelSceneInterface extends Phaser.Scene {
+    position: number;
+    settings: LevelConfiguration;
+    player: PlayerObject;
+    status: LEVELSTATUS;
+
     init: (configuration: LevelConfiguration) => void;
 }
 
-export interface BackgroundSceneInterface extends Phaser.Scene {
+
+
+export interface USERCONFIGS {
+    mainVolume: number;
+    inputMethod: "KEYS"|"PAD";
 
 }
-
-export interface GUISceneInterface extends Phaser.Scene {
-
-}
-
-
-
