@@ -13,9 +13,10 @@ node_modules/
 /npm-debug.log
 
 # Do not push mp3 files at least for now.
-*.mp3
+
+
 
 # Do not push atlas files
-/dist/assets/atlasses/*
+
 
 /psds/*.psd

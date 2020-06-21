@@ -1,0 +1,140 @@
+{"frames": [
+
+{
+	"filename": "crystalballV001effect-loop000.png",
+	"frame": {"x":39,"y":1,"w":34,"h":34},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":15,"y":15,"w":34,"h":34},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop001.png",
+	"frame": {"x":76,"y":37,"w":34,"h":33},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":16,"y":16,"w":34,"h":33},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop002.png",
+	"frame": {"x":75,"y":1,"w":34,"h":34},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":15,"y":15,"w":34,"h":34},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop003.png",
+	"frame": {"x":147,"y":36,"w":34,"h":33},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":15,"y":16,"w":34,"h":33},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop004.png",
+	"frame": {"x":177,"y":71,"w":34,"h":33},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":15,"y":16,"w":34,"h":33},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop005.png",
+	"frame": {"x":111,"y":1,"w":35,"h":33},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":16,"w":35,"h":33},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop006.png",
+	"frame": {"x":1,"y":1,"w":36,"h":33},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":16,"w":36,"h":33},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop007.png",
+	"frame": {"x":148,"y":1,"w":35,"h":33},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":15,"y":16,"w":35,"h":33},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop008.png",
+	"frame": {"x":1,"y":36,"w":36,"h":33},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":16,"w":36,"h":33},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop009.png",
+	"frame": {"x":39,"y":37,"w":35,"h":33},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":15,"y":16,"w":35,"h":33},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop010.png",
+	"frame": {"x":36,"y":72,"w":34,"h":34},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":15,"y":15,"w":34,"h":34},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop011.png",
+	"frame": {"x":1,"y":71,"w":33,"h":35},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":15,"y":14,"w":33,"h":35},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop012.png",
+	"frame": {"x":72,"y":72,"w":33,"h":34},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":15,"y":15,"w":33,"h":34},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop013.png",
+	"frame": {"x":107,"y":72,"w":33,"h":34},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":16,"y":15,"w":33,"h":34},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop014.png",
+	"frame": {"x":112,"y":36,"w":33,"h":34},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":16,"y":15,"w":33,"h":34},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "crystalballV001effect-loop015.png",
+	"frame": {"x":142,"y":72,"w":33,"h":34},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":16,"y":15,"w":33,"h":34},
+	"sourceSize": {"w":64,"h":64}
+}],
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "CrystalBall.png",
+	"format": "RGBA8888",
+	"size": {"w":212,"h":107},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:ad833cb63e209ea019cb1e0bfc994e84:35c7dc7c31d92f03d6094d161d6d2e63:1f963c44f9dbb14c5547216179738b03$"
+}
+}
