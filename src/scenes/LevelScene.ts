@@ -1,7 +1,11 @@
-import { LevelSceneInterface, LevelConfiguration, PlayerObject, GeneralObject, AssetConfiguration, AssetType, AtlasAssetConfiguration, BackgroundImageConfiguration, BackgroundImage, DEPTHLEVEL, LEVELSTATUS } from "../interfaces/Interfaces";
+import { LevelSceneInterface, LevelConfiguration, PlayerObject, GeneralObject, AssetConfiguration, AssetType, AtlasAssetConfiguration, BackgroundImageConfiguration, BackgroundImage, DEPTHLEVEL, LEVELSTATUS, ObjectConfiguration, ObjectType, MovingObject, SingleObjectConfiguration, GameObjectType, TileMapConfiguration } from "../interfaces/Interfaces";
 import { TEXT_Massive } from "../textStyles/textStyles";
 import UserConfigs from "../data/UserConfigs";
 import createPlayerObject from "../objects/PlayerObject";
+import Crystal from "../objects/Crystal";
+import objectBuilder from "../objects/objectBuilder";
+import collCategory from "../objects/CollisionCategories";
+import { createFinishLine } from "../objects/FinishLine";
 
 export default class LevelScene extends Phaser.Scene implements LevelSceneInterface {
 
@@ -27,6 +31,7 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
     init(configuration: LevelConfiguration) {
         this.settings = configuration;
         console.log("INIT", configuration);
+        
     }
 
     /**
@@ -34,6 +39,7 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
      */
     preload() {
         console.log("PRELOAD", this.settings);
+        collCategory.init(this);
         const center = getCanvasCenter(this);
         this.status = LEVELSTATUS.LOAD;
 
@@ -71,8 +77,12 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
                     const atlasAsset = asset as AtlasAssetConfiguration;
                     this.load.atlas(atlasAsset.id, atlasAsset.filename, atlasAsset.json);
                     break;
+                case AssetType.TILEMAPJSON:
+                    console.log("LOAD TILEMAP", asset);
+                    this.load.tilemapTiledJSON(asset.id, asset.json);
+                    break;
                 default:
-                    console.warn(`Asset type ${asset.type} is unknown!`, asset);
+                    console.warn(`Asset is unknown!`, asset);
                     break;
             }
         });
@@ -96,13 +106,36 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
         });
 
 
+        // Tilemap
+        this.settings.tilemaps.forEach((tm: TileMapConfiguration) => {
+            const map = this.make.tilemap({
+                key: tm.tilemap,
+            });
+        })
+
+
+
         // Player
         this.player = createPlayerObject();
         this.player.create(this);
 
+        // Objects
+        this.settings.objects.forEach((objConf: ObjectConfiguration) => {
+            const objs = objectBuilder(objConf);
+            if (objs !== null) {
+                objs.forEach((o: GeneralObject) => {
+                    o.create(this);
+                    this.objects.push(o);
+                });
+            }
+        })
 
+        // Finish Line
+        const finish = createFinishLine(this.settings.finishLine);
+        finish.create(this);
+        this.objects.push(finish);
         
-        console.log("WORLD WALLS", this.matter.world.walls);
+        
 
         // Fade the message out.
         const fadeTween = this.tweens.create({
@@ -135,11 +168,14 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
         // Pause functionality
         this.input.keyboard.on("keyup-P", () => {
             if (this.status === LEVELSTATUS.PAUSED) {
-                
+
                 this.status = this.previousStatus;
                 this.sound.resumeAll();
                 this.messageText.setVisible(false);
             } else {
+
+                //TODO: Player causes a type error when pausing
+                // This happens when the program has been running for a while
                 const nstat = this.status;
                 this.previousStatus = nstat;
                 this.status = LEVELSTATUS.PAUSED;
@@ -147,27 +183,34 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
                 this.messageText.setText("PAUSED!");
                 this.messageText.setVisible(true);
                 this.messageText.setAlpha(1);   // If message was faded to alpha 0 before, set it to 1.
+                
+                this.objects.forEach((obj: GeneralObject) => {
+                    if (!obj.objectIsStatic) {
+                        (obj as MovingObject).pause(this);
+                    }
+                });
+                this.player.pause(this);
+                
             }
         });
 
         // Sound mutiong with key M
         this.input.keyboard.on("keyup-M", () => {
-            if(this.status !== LEVELSTATUS.PAUSED) {
-                if(this.sound.volume === 0) {
+            if (this.status !== LEVELSTATUS.PAUSED) {
+                if (this.sound.volume === 0) {
                     this.sound.volume = UserConfigs.mainVolume;
                 } else {
                     this.sound.volume = 0;
                 }
             }
-        })
-
-
-    }
+        });
+    }    
 
     update(time: number, delta: number) {
+        
         if (this.status === LEVELSTATUS.RUN || this.status === LEVELSTATUS.HOLD) {
 
-            
+
             // Update camera position
             if (this.status !== LEVELSTATUS.HOLD) {
                 // Move camera
@@ -183,13 +226,35 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
                 bg.update(this);
             });
 
+
+            // Update objects
+            this.objects.forEach((obj: GeneralObject) => {
+                obj.update(this, time, delta);
+            });
+
             // Update Player
             this.player.update(this, time, delta);
 
             const playerStatus = this.player.getStatus();
+
+            // Check if player has passed the finishline
+            if(playerStatus.position.x >= this.settings.finishLine + 40) {
+                this.victory();        
+            }
+
+
             // Move position forward by whatever speed is necessary
             if (this.status !== LEVELSTATUS.HOLD) this.position += playerStatus.shape?.cameraSpeed || 1;
         }
+    }
+
+    victory() {
+        this.status = LEVELSTATUS.END;
+        this.player.pause(this);
+        this.messageText.setAlpha(1);
+        this.messageText.setText("VICTORY");
+        this.messageText.setVisible(true);
+        this.music.stop();
     }
 }
 
@@ -199,6 +264,11 @@ function createBackgroundImage(config: BackgroundImageConfiguration): Background
 
     let paused = false;
 
+    
+    let bg: Phaser.GameObjects.TileSprite; 
+
+    let bgImages: Phaser.GameObjects.Image[] = [];
+
     let background: Phaser.GameObjects.Image;
     let background2: Phaser.GameObjects.Image;
 
@@ -206,31 +276,29 @@ function createBackgroundImage(config: BackgroundImageConfiguration): Background
 
     let counter: number = 2;
 
-    function create(scene: Phaser.Scene) {
-        background = scene.add.image(0, 0, config.assetId).setOrigin(0);
-        background2 = scene.add.image(background.width, 0, config.assetId).setOrigin(0).setFlipX(true);
-        background.setDepth(config.depth);
-        background2.setDepth(config.depth);
+    function create(scene: LevelSceneInterface) {
+        const x = config.x !== undefined ? config.x : 0;
+        const y = config.y !== undefined ? config.y : 0;
+        const w = config.width !== undefined ? config.width : scene.sys.canvas.width;
+        const h = config.height !== undefined ? config.height : scene.sys.canvas.height;
 
-        background.setScrollFactor(config.speed);
-        background2.setScrollFactor(config.speed);
-        background.setAlpha(config.opacity);
-        background2.setAlpha(config.opacity);
-
-        restartPoint = background.width;
+        
+        bg = scene.add.tileSprite(x,y, w, h, config.assetId).setOrigin(0,0);
+        bg.setAlpha(config.opacity);
+        bg.setScrollFactor(config.speed);
+        if(config.tint !== undefined) {
+            if(Array.isArray(config.tint)) {
+                bg.setTint(config.tint[0],config.tint[1],config.tint[2],config.tint[3]);
+            } else {
+                bg.setTint(config.tint);
+            }   
+        }
+        
+        config.scale && bg.setTileScale(config.scale);
     }
 
     function update(scene: Phaser.Scene) {
-        if (scene.cameras.main.scrollX >= restartPoint) {
-            if (counter % 2 === 0) {
-                background.x = counter * background.width;
-            } else {
-                background2.x = counter * background2.width;
-            }
 
-            restartPoint = background.width * counter;
-            counter++;
-        }
     }
 
     function pause() {
@@ -248,9 +316,7 @@ function createBackgroundImage(config: BackgroundImageConfiguration): Background
         resume
     };
 
-
 }
-
 
 
 

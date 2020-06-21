@@ -6,13 +6,16 @@ import TestScene from './scenes/TestScene';
 import { LEVEL_TestLevel } from './levels/testLevel';
 import LevelScene from './scenes/LevelScene';
 
-let w = 1440;
+const w = 1440;
+const h = Math.round(1440 / 1.7777777);
+
+
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     backgroundColor: '#000000',
     title: "BLOCKY TRIP",
-    width: w,
-    height: Math.round(w / 1.7777777),
+    width: 1440,
+    height: 800,
     parent: "gameContainer",
     physics: {
         default: 'matter',
@@ -21,8 +24,9 @@ const config: Phaser.Types.Core.GameConfig = {
                 showBody: true,
                 showStaticBody: true,
 
-                showBounds: false,
-                
+                // showBounds: true,
+
+
                 
                 showCollisions: true,
                 

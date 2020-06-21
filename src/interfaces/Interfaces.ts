@@ -3,25 +3,26 @@
 
 // Objects that populate the level
 
-
-
 export interface GeneralObject {
+    objectIsStatic: boolean;
+    myType: GameObjectType;
 
-    myType: GameObjectTypes;
-    
+    create: (scene: LevelSceneInterface) => void;
     update: (scene: LevelSceneInterface, time?: number, delta?: number) => void;
 }
 
 
 export interface StaticObject extends GeneralObject {
     objectIsStatic: true;
+    
 }
 
 export interface MovingObject extends GeneralObject {
     objectIsStatic: false;
+    pause: (scene: LevelSceneInterface) => void;
 }
 
-export interface PickupObject extends StaticObject {
+export interface PickupObject extends MovingObject {
 
 }
 
@@ -33,19 +34,21 @@ export interface EnemyObject extends MovingObject {
 
 }
 
-export enum GameObjectTypes {
+export enum GameObjectType {
     WALL = "Wall",
 
     CRYSTAL = "Crystal",
 
     PLAYER = "Player",
+
+    FINISHLINE = "Finish Line",
 }
 
 
 // Player Objects
 
-export interface PlayerObject extends GeneralObject {
-    myType: GameObjectTypes.PLAYER;
+export interface PlayerObject extends MovingObject {
+    myType: GameObjectType.PLAYER;
     shape: PlayerShapeObject;
     
     create: (scene: LevelSceneInterface) => void;
@@ -57,10 +60,12 @@ export interface PlayerObject extends GeneralObject {
 export interface PlayerLevelStatus {
     health: number;
     shape: PlayerShapeObject;
+    position: Phaser.Geom.Point;
 }
 
 export interface PlayerShapeObject {
-    collisionPolygon: Phaser.Math.Vector2[];
+    // collisionPolygon: Phaser.Math.Vector2[] | Phaser.Geom.Polygon | Phaser.Geom.Point[] | string;
+    collisionPolygon: string | any[];
     spriteId: string;
     rotationVelocity: number;
     movementVelocity: number;
@@ -78,10 +83,11 @@ export interface LevelConfiguration {
     finishLine: number;
     playerStartX: number;
     playerStartY: number;
-    objects: GeneralObject[];
+    objects: ObjectConfiguration[];
     assets: AssetConfiguration[];
-    backgroundMusic: string;
+    tilemaps: TileMapConfiguration[];
 
+    backgroundMusic: string;
     backgroundImages: BackgroundImageConfiguration[];
 }
 
@@ -91,35 +97,76 @@ export interface BackgroundImageConfiguration {
     speed: number;
     opacity: number;
     depth: DEPTHLEVEL;
-    tint?: number;
-    
+    tint?: number | [number, number, number, number];
+    width?: number;
+    height?: number;
+    x?: number;
+    y?: number;
+    tx?: number;
+    ty?: number;
+    scale?: number;
+}
+
+export interface ObjectConfiguration {
+    target: GameObjectType;
+    coords: [number, number][];
+    config?: Record<string, any>;
+}
+
+export interface SingleObjectConfiguration {
+    target: GameObjectType,
+    x: number;
+    y: number;
+    config?: Record<string, any>;
+}
+
+export interface TileMapConfiguration {
+    tilemap: string;
 }
 
 export enum AssetType {
     IMAGE = "Image",
     ATLAS = "Atlas",
     AUDIO = "Audio",
+    JSON = "Json",
+    TILEMAPCSV = "TileMapCSV",
+    TILEMAPJSON = "TileMapJSON",
 }
 
-export interface AssetConfiguration {
+export enum ObjectType {
+    Crystal = "Crystal",
+    Wall = "Wall",
+}
+
+
+export type AssetConfiguration = ImageAssetConfiguration | AudioAssetConfiguration | AtlasAssetConfiguration | TileMapJsonAssetConfiguration;
+
+export interface ImageAssetConfiguration {
     id: string;
-    type: AssetType;
     filename: string;
-}
-
-export interface ImageAssetConfiguration extends AssetConfiguration {
     type: AssetType.IMAGE;
 }
 
-export interface AudioAssetConfiguration extends AssetConfiguration {
+export interface AudioAssetConfiguration {
+    id: string;
+    filename: string;
     type: AssetType.AUDIO;
 }
 
-export interface AtlasAssetConfiguration extends AssetConfiguration {
+
+export interface AtlasAssetConfiguration {
+    id: string;
+    filename: string;
     type: AssetType.ATLAS;
     json: string;
 }
 
+export interface TileMapJsonAssetConfiguration {
+    id: string;
+    json: string;
+    type: AssetType.TILEMAPJSON;
+    tileImages: string;
+}
 
 
 export enum DEPTHLEVEL {

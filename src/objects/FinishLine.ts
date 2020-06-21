@@ -1,43 +1,45 @@
-import { GameObject } from "../interfaces/GameObject";
-import { playerData } from "../data/playerData";
-import { GameLevelSceneInterface } from "../interfaces/Level";
-import endLevel from "../utils/endLevel";
+import { GeneralObject, LevelSceneInterface, GameObjectType, SingleObjectConfiguration } from "../interfaces/Interfaces";
 
-export default function FinishLine(x: number): GameObject {
+export default function FinishLine(config: SingleObjectConfiguration): GeneralObject {
 
+    // let finishLine: Phaser.GameObjects.Rectangle[] = [];
 
-    let finishLine: Phaser.GameObjects.Rectangle[] = [];
+    let finishLine: Phaser.GameObjects.Container;
 
     let endLevelCalled = false;
 
-    function preload(scene: GameLevelSceneInterface) {
-
-    }
-
-    function create(scene: GameLevelSceneInterface) {
+    function create(scene: LevelSceneInterface) {
+        const x = config.x;
         const ch = scene.sys.canvas.height;
         let s = 0;
+        finishLine = scene.add.container(x, 0);
         while (s < ch) {
-            const b = scene.add.rectangle(x, s, 20, 50, 0x005500, 0.5)
+            const b = scene.add.rectangle(0, s, 20, 50, 0x005500, 0.5)
             b.setScrollFactor(1);
-            finishLine.push(b);
+            finishLine.add(b);
             s += 100;
         }
     }
 
-    function update(scene: GameLevelSceneInterface) {
-
-        if (playerData.xPos > x && !endLevelCalled) {
-            endLevelCalled = true;
-            endLevel(scene);
-        }
+    function update(scene: LevelSceneInterface) {
 
     }
 
     return {
-        preload,
+        myType: GameObjectType.FINISHLINE,
+        objectIsStatic: true,
         create,
-        update,
+        update
     }
 
+}
+
+
+export function createFinishLine(x: number): GeneralObject {
+    const conf: SingleObjectConfiguration = {
+        target: GameObjectType.FINISHLINE,
+        x: x,
+        y: 0,
+    };
+    return FinishLine(conf);
 }

@@ -1,17 +1,25 @@
-import { PlayerObject, GameObjectTypes, LevelSceneInterface, PlayerShapeObject, PlayerLevelStatus } from "../interfaces/Interfaces";
+import { PlayerObject, GameObjectType, LevelSceneInterface, PlayerShapeObject, PlayerLevelStatus, LEVELSTATUS, DEPTHLEVEL } from "../interfaces/Interfaces";
 import UserConfigs from "../data/UserConfigs";
+import collCategory from "./CollisionCategories";
 
 
+interface PlayerSoundEffects {
+    shapeshift: Phaser.Sound.BaseSound|Phaser.Sound.WebAudioSound|Phaser.Sound.HTML5AudioSound|null;
+    thrust: Phaser.Sound.BaseSound|Phaser.Sound.WebAudioSound|Phaser.Sound.HTML5AudioSound|null;
+    rotate: Phaser.Sound.BaseSound|Phaser.Sound.WebAudioSound|Phaser.Sound.HTML5AudioSound|null;
+    damage: Phaser.Sound.BaseSound|Phaser.Sound.WebAudioSound|Phaser.Sound.HTML5AudioSound|null;
 
+}
 
 export default function createPlayerObject(): PlayerObject {
 
     // Publicly available 
-    let myType: GameObjectTypes = GameObjectTypes.PLAYER;
+    let myType: GameObjectType = GameObjectType.PLAYER;
     let shape: PlayerShapeObject;
 
 
     // private values
+    const objectIsStatic = false;
     let health: number = 100;
     const shapes: PlayerShapeObject[] = [shapeOne, shapeTwo];
     let currentShapeIndex: number = 0;
@@ -22,29 +30,40 @@ export default function createPlayerObject(): PlayerObject {
     // Current player sprite
     let sprite: Phaser.Physics.Matter.Sprite;
 
+    // Sound Effects
+    const soundEffects: PlayerSoundEffects = {
+        shapeshift: null,
+        thrust: null,
+        rotate: null,
+        damage: null,
+    }
+
     function getStatus(): PlayerLevelStatus {
 
         return {
             health,
-            shape
+            shape,
+            position: new Phaser.Geom.Point(sprite.x, sprite.y)
         }
     }
 
     function nextShape(scene: LevelSceneInterface) {
         currentShapeIndex++;
-        if(currentShapeIndex >= shapes.length) {
+        if (currentShapeIndex >= shapes.length) {
             currentShapeIndex = 0;
         }
         console.log("NEXT SHAPE!", currentShapeIndex);
+        if(soundEffects.shapeshift !== null) soundEffects.shapeshift.play();
         createShape(scene);
     }
 
     function prevShape(scene: LevelSceneInterface) {
         currentShapeIndex--;
-        if(currentShapeIndex < 0) {
+        if (currentShapeIndex < 0) {
             currentShapeIndex = shapes.length - 1;
         }
         console.log("PREVIOUS SHAPE!", currentShapeIndex);
+        if(soundEffects.shapeshift !== null) soundEffects.shapeshift.play();
         createShape(scene);
     }
 
@@ -87,24 +106,41 @@ export default function createPlayerObject(): PlayerObject {
         // createShape
         createShape(scene);
 
+        // Create sound effects
+        soundEffects.shapeshift = scene.sound.add("player-shape-shift", {loop: false, volume: 0.3, detune: 10});
+
 
         // Initialize user control method (Only KEYBOARD for now)
         if (UserConfigs.inputMethod === "KEYS") {
             userControl = createKeyboardInterface();
             userControl.create(scene);
         }
+
     }
 
 
     function update(scene: LevelSceneInterface, time?: number, delta?: number) {
-
+        if(!sprite.active) {
+            sprite.setActive(true);
+        }
         // Reset velocity before adjusting it via controls
-        sprite.setVelocity(shape.cameraSpeed || 1, 0);
+        if(scene.status === LEVELSTATUS.RUN) {
+            sprite.setVelocity(shape.cameraSpeed || 1, 0);
+        } else {
+            sprite.setVelocity(0);
+        }
         sprite.setAngularVelocity(0);
 
         // User Controls
         userControl.update(scene, time, delta);
 
+    }
+
+    function pause(scene: LevelSceneInterface) {
+        console.log("PLAYER PAUSED");
+        sprite.setActive(false);
+        sprite.setVelocity(0);
+        sprite.setAngularVelocity(0);
     }
 
 
@@ -115,38 +151,54 @@ export default function createPlayerObject(): PlayerObject {
         const cy = sprite ? sprite.y : scene.settings.playerStartY;
         const ca = sprite ? sprite.angle : 0;
 
-        if(sprite) {
+        if (sprite) {
             sprite.destroy();
         }
-        // const body = scene.matter.add.fromVertices(cx, cy, shape.collisionPolygon, )
-        //{ friction: 0, frictionAir: 0, frictionStatic: 0, density: 10, ignoreGravity: true, label: "PLAYER", vertices: shape.collisionPolygon }'
 
-        sprite = scene.matter.add.sprite(cx, cy, shape.spriteId, null, {
+        const mSetBConf: Phaser.Types.Physics.Matter.MatterSetBodyConfig = {
+            type: "fromVerts",
+            verts: shape.collisionPolygon,
+            flagInternal: true
+        };
+
+        const mbConf: Phaser.Types.Physics.Matter.MatterBodyConfig = {
             friction: 0,
             frictionAir: 0,
             frictionStatic: 0,
             density: 10,
             ignoreGravity: true,
             label: "PLAYER",
-            vertices: shape.collisionPolygon,
-            restitution: 0,
-        });
+            shape: mSetBConf,
+        };
 
-        sprite.setActive(true);
-        sprite.setCollisionGroup(0);
+        const plainSprite = scene.add.sprite(cx, cy, shape.spriteId);
+        sprite = scene.matter.add.gameObject(plainSprite, mbConf) as Phaser.Physics.Matter.Sprite;
 
+
+        sprite.setCollisionCategory(collCategory.Player);
+        sprite.setDepth(DEPTHLEVEL.PLAYER);
+        // sprite.setCollidesWith([collCategory.Enemy, collCategory.Pickup, collCategory.Static]); 
+        
+        // Collision Handler
         sprite.setOnCollide((e) => {
-            console.log("COLLISION!");
+            console.log("PLAYER COLLISION!");
         })
+        // sprite.setOnCollideActive((e) => {
+        //     console.log("ACTIVE COLLISION!", e);
+        // })
         sprite.angle = ca;
         sprite.name = "PLAYER";
+
+        console.log(sprite.toJSON());
     }
 
     return {
+        objectIsStatic,
         myType,
         shape,
         update,
         create,
+        pause,
         getStatus,
         action
     }
@@ -223,29 +275,37 @@ const shapeOne: PlayerShapeObject = {
     cameraSpeed: 1,
     movementVelocity: 4,
     rotationVelocity: 0.05,
-    collisionPolygon: [
-        new Phaser.Math.Vector2(0, 0),
-        new Phaser.Math.Vector2(80, 0),
-        new Phaser.Math.Vector2(80, 80),
-        new Phaser.Math.Vector2(0, 80),
-        new Phaser.Math.Vector2(0, 0),
-    ]
-    ,
+    collisionPolygon: '0, 0, 80, 0, 80, 80, 0, 80, 0, 0',
+    // collisionPolygon: [
+    //     new Phaser.Geom.Point(0, 0),
+    //     new Phaser.Geom.Point(80, 0),
+    //     new Phaser.Geom.Point(80, 80),
+    //     new Phaser.Geom.Point(0, 80),
+    //     new Phaser.Geom.Point(0, 0),
+    // ],
+    // collisionPolygon: [
+    //     new Phaser.Math.Vector2(0, 0),
+    //     new Phaser.Math.Vector2(80, 0),
+    //     new Phaser.Math.Vector2(80, 80),
+    //     new Phaser.Math.Vector2(0, 80),
+    //     new Phaser.Math.Vector2(0, 0),
+    // ],
     spriteId: "player-shape-one"
 };
 
 const shapeTwo: PlayerShapeObject = {
     name: "Second Shape",
-    cameraSpeed: 2,
+    cameraSpeed: 3,
     movementVelocity: 1,
     rotationVelocity: 0.02,
-    collisionPolygon: [
-        new Phaser.Math.Vector2(0, 0),
-        new Phaser.Math.Vector2(160, 0),
-        new Phaser.Math.Vector2(160, 40),
-        new Phaser.Math.Vector2(0, 40),
-        new Phaser.Math.Vector2(0, 0),
-    ],
+    collisionPolygon: '0, 0, 160, 0, 160, 40, 0, 40, 0, 0',
+    // collisionPolygon: [
+    //     new Phaser.Math.Vector2(0, 0),
+    //     new Phaser.Math.Vector2(160, 0),
+    //     new Phaser.Math.Vector2(160, 40),
+    //     new Phaser.Math.Vector2(0, 40),
+    //     new Phaser.Math.Vector2(0, 0),
+    // ],
     spriteId: "player-shape-two"
 };
 
