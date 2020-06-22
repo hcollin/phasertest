@@ -7,6 +7,14 @@ import objectBuilder from "../objects/objectBuilder";
 import collCategory from "../objects/CollisionCategories";
 import { createFinishLine } from "../objects/FinishLine";
 
+interface tilenMapObject {
+    map: Phaser.Tilemaps.Tilemap,
+    tiles: Phaser.Tilemaps.Tileset[],
+    layers: (Phaser.Tilemaps.StaticTilemapLayer | Phaser.Tilemaps.DynamicTilemapLayer)[],
+};
+
+
+
 export default class LevelScene extends Phaser.Scene implements LevelSceneInterface {
 
     public settings: LevelConfiguration;
@@ -21,6 +29,7 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
     private previousStatus: LEVELSTATUS;
     private messageText: Phaser.GameObjects.Text;
 
+    private tilemaps = [];
 
     public position: number = 0;
 
@@ -31,7 +40,7 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
     init(configuration: LevelConfiguration) {
         this.settings = configuration;
         console.log("INIT", configuration);
-        
+
     }
 
     /**
@@ -78,7 +87,6 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
                     this.load.atlas(atlasAsset.id, atlasAsset.filename, atlasAsset.json);
                     break;
                 case AssetType.TILEMAPJSON:
-                    console.log("LOAD TILEMAP", asset);
                     this.load.tilemapTiledJSON(asset.id, asset.json);
                     break;
                 default:
@@ -111,7 +119,40 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
             const map = this.make.tilemap({
                 key: tm.tilemap,
             });
-        })
+            
+            const tilesets: Phaser.Tilemaps.Tileset[] = map.tilesets.map((tl: Phaser.Tilemaps.Tileset) => {
+                const tiles = map.addTilesetImage('DungeonTileSet', 'dungeon-tiles');
+                return tiles;
+            })
+            
+            
+            parseTileSetProperties(map.tilesets);
+
+            const layers = map.layers.map((layer: Phaser.Tilemaps.LayerData, index: number) => {
+
+                const layerProperties = parseTileMapLayerProperties(layer);
+
+                if (layerProperties.get("dynamic") === true) {
+                    const layer: Phaser.Tilemaps.DynamicTilemapLayer = map.createDynamicLayer(index, tilesets, 0, 0);
+                    
+                    if (layerProperties.get("collisionAll") === true) {
+                        map.setCollisionByExclusion([-1, 0]);
+                        this.matter.world.convertTilemapLayer(layer);
+                    }
+                    return layer;
+                } else {
+                    return map.createStaticLayer(index, tilesets, 0, 0);
+                }
+
+            });
+
+            const tileMap: tilenMapObject = {
+                map,
+                tiles: tilesets,
+                layers,
+            }
+            this.tilemaps.push(tileMap);
+        });        
 
 
 
@@ -134,8 +175,8 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
         const finish = createFinishLine(this.settings.finishLine);
         finish.create(this);
         this.objects.push(finish);
-        
-        
+
+
 
         // Fade the message out.
         const fadeTween = this.tweens.create({
@@ -183,14 +224,14 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
                 this.messageText.setText("PAUSED!");
                 this.messageText.setVisible(true);
                 this.messageText.setAlpha(1);   // If message was faded to alpha 0 before, set it to 1.
-                
+
                 this.objects.forEach((obj: GeneralObject) => {
                     if (!obj.objectIsStatic) {
                         (obj as MovingObject).pause(this);
                     }
                 });
                 this.player.pause(this);
-                
+
             }
         });
 
@@ -204,10 +245,10 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
                 }
             }
         });
-    }    
+    }
 
     update(time: number, delta: number) {
-        
+
         if (this.status === LEVELSTATUS.RUN || this.status === LEVELSTATUS.HOLD) {
 
 
@@ -238,8 +279,8 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
             const playerStatus = this.player.getStatus();
 
             // Check if player has passed the finishline
-            if(playerStatus.position.x >= this.settings.finishLine + 40) {
-                this.victory();        
+            if (playerStatus.position.x >= this.settings.finishLine + 40) {
+                this.victory();
             }
 
 
@@ -264,8 +305,8 @@ function createBackgroundImage(config: BackgroundImageConfiguration): Background
 
     let paused = false;
 
-    
-    let bg: Phaser.GameObjects.TileSprite; 
+
+    let bg: Phaser.GameObjects.TileSprite;
 
     let bgImages: Phaser.GameObjects.Image[] = [];
 
@@ -282,18 +323,18 @@ function createBackgroundImage(config: BackgroundImageConfiguration): Background
         const w = config.width !== undefined ? config.width : scene.sys.canvas.width;
         const h = config.height !== undefined ? config.height : scene.sys.canvas.height;
 
-        
-        bg = scene.add.tileSprite(x,y, w, h, config.assetId).setOrigin(0,0);
+
+        bg = scene.add.tileSprite(x, y, w, h, config.assetId).setOrigin(0, 0);
         bg.setAlpha(config.opacity);
         bg.setScrollFactor(config.speed);
-        if(config.tint !== undefined) {
-            if(Array.isArray(config.tint)) {
-                bg.setTint(config.tint[0],config.tint[1],config.tint[2],config.tint[3]);
+        if (config.tint !== undefined) {
+            if (Array.isArray(config.tint)) {
+                bg.setTint(config.tint[0], config.tint[1], config.tint[2], config.tint[3]);
             } else {
                 bg.setTint(config.tint);
-            }   
+            }
         }
-        
+
         config.scale && bg.setTileScale(config.scale);
     }
 
@@ -319,6 +360,29 @@ function createBackgroundImage(config: BackgroundImageConfiguration): Background
 }
 
 
+interface TiledPropertyObject {
+    name: string;
+    type: string;
+    value: any;
+}
+
+
+function parseTileMapLayerProperties(layer: Phaser.Tilemaps.LayerData): Map<string, any> {
+
+    const properties: Map<string, any> = new Map<string, any>();
+
+    if (Array.isArray(layer.properties)) {
+        layer.properties.forEach((val: object, index: number) => {
+            const tProp = val as TiledPropertyObject;
+            properties.set(tProp.name, tProp.value);
+        });
+    }
+    return properties;
+}
+
+function parseTileSetProperties(tiles: any[]) {
+    console.log(tiles);
+}
 
 function getCanvasCenter(scene: Phaser.Scene): [number, number] {
     return [scene.sys.canvas.width / 2, scene.sys.canvas.height / 2];
