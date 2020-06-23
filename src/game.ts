@@ -3,7 +3,7 @@ import 'phaser';
 import LevelSelectorScene from './scenes/LevelSelector';
 import LoadingScreen from './scenes/LoadingScreen';
 import TestScene from './scenes/TestScene';
-// import { LEVEL_TestLevel } from './levels/testLevel';
+import { LEVEL_TestLevel } from './levels/testLevel';
 import LevelScene from './scenes/LevelScene';
 import { LEVEL_DungeonLevel } from './levels/dungeonlevel';
 
@@ -16,7 +16,7 @@ const config: Phaser.Types.Core.GameConfig = {
     backgroundColor: '#000000',
     title: "BLOCKY TRIP",
     width: 1440,
-    height: 800,
+    height: 32*25,
     parent: "gameContainer",
     physics: {
         default: 'matter',
@@ -45,8 +45,8 @@ const config: Phaser.Types.Core.GameConfig = {
 
 const game = new Phaser.Game(config);
 
-game.scene.add(LEVEL_DungeonLevel.id, LevelScene, true, LEVEL_DungeonLevel);
-// game.scene.add(LEVEL_TestLevel.id, LevelScene, true, LEVEL_TestLevel);
+// game.scene.add(LEVEL_DungeonLevel.id, LevelScene, true, LEVEL_DungeonLevel);
+game.scene.add(LEVEL_TestLevel.id, LevelScene, true, LEVEL_TestLevel);
 
 
 

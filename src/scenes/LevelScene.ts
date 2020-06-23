@@ -116,16 +116,17 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
 
         // Tilemap
         this.settings.tilemaps.forEach((tm: TileMapConfiguration) => {
+            
             const map = this.make.tilemap({
                 key: tm.tilemap,
             });
-            
+
             const tilesets: Phaser.Tilemaps.Tileset[] = map.tilesets.map((tl: Phaser.Tilemaps.Tileset) => {
-                const tiles = map.addTilesetImage('DungeonTileSet', 'dungeon-tiles');
+
+                const tiles = map.addTilesetImage(tl.name, tm.tiles);
                 return tiles;
-            })
-            
-            
+            });
+
             parseTileSetProperties(map.tilesets);
 
             const layers = map.layers.map((layer: Phaser.Tilemaps.LayerData, index: number) => {
@@ -134,7 +135,7 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
 
                 if (layerProperties.get("dynamic") === true) {
                     const layer: Phaser.Tilemaps.DynamicTilemapLayer = map.createDynamicLayer(index, tilesets, 0, 0);
-                    
+
                     if (layerProperties.get("collisionAll") === true) {
                         map.setCollisionByExclusion([-1, 0]);
                         this.matter.world.convertTilemapLayer(layer);
@@ -152,7 +153,7 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
                 layers,
             }
             this.tilemaps.push(tileMap);
-        });        
+        });
 
 
 

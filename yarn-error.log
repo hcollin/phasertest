@@ -1,0 +1,68 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js add
+
+PATH: 
+  C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32\compiler;C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64\compiler;C:\Program Files\Docker\Docker\Resources\bin;C:\ProgramData\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\ProgramData\chocolatey\bin;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\Common Files\Adobe\AGL;C:\xampp\php;C:\Program Files\TortoiseHg\;C:\Program Files\Java\jdk1.8.0_102\bin;C:\Program Files\TortoiseGit\bin;C:\Program Files (x86)\Yarn\bin\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\Microsoft VS Code\bin;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\UniConvertor-2.0rc4\;C:\Ruby22\bin;C:\Program Files (x86)\Microsoft VS Code\bin;C:\apps\nginx-1.11.3;C:\apps\lein;C:\Users\Henrik Collin\AppData\Local\Microsoft\WindowsApps;C:\Users\Henrik Collin\AppData\Local\atom\bin;C:\Python27;c:\tools;C:\Users\Henrik Collin\AppData\Local\.meteor\;C:\Users\Henrik Collin\AppData\Local\Yarn\bin;C:\Users\Henrik Collin\AppData\Roaming\npm;C:\Program Files (x86)\FAHClient
+
+Yarn version: 
+  1.5.1
+
+Node version: 
+  10.15.1
+
+Platform: 
+  win32 x64
+
+npm manifest: 
+  {
+      "name": "phaser3-typescript-project-template",
+      "version": "1.0.2",
+      "description": "A Phaser 3 Project Template using Rollup and TypeScript",
+      "main": "src/game.ts",
+      "scripts": {
+          "dev": "rollup --config rollup.config.dev.js",
+          "build": "rollup --config rollup.config.dist.js",
+          "watch": "rollup --watch --config rollup.config.dev.js"
+      },
+      "repository": {
+          "type": "git",
+          "url": "git+https://github.com/photonstorm/phaser3-typescript-project-template.git"
+      },
+      "author": "Richard Davey <rich@photonstorm.com> (http://www.photonstorm.com)",
+      "license": "MIT",
+      "bugs": {
+          "url": "https://github.com/photonstorm/phaser3-typescript-project-template/issues"
+      },
+      "homepage": "https://github.com/photonstorm/phaser3-typescript-project-template#readme",
+      "dependencies": {},
+      "devDependencies": {
+          "@rollup/plugin-replace": "^2.3.0",
+          "phaser": "^3.23.0",
+          "rollup": "^1.29.0",
+          "rollup-plugin-commonjs": "^10.1.0",
+          "rollup-plugin-node-resolve": "^5.2.0",
+          "rollup-plugin-serve": "^1.0.1",
+          "rollup-plugin-typescript2": "^0.25.3",
+          "rollup-plugin-uglify": "^6.0.4",
+          "typescript": "^3.7.4"
+      }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
+
+Trace: 
+  Error: Missing list of packages to add to your project.
+      at new MessageError (C:\Program Files (x86)\Yarn\lib\cli.js:186:110)
+      at Object.<anonymous> (C:\Program Files (x86)\Yarn\lib\cli.js:40587:13)
+      at Generator.next (<anonymous>)
+      at step (C:\Program Files (x86)\Yarn\lib\cli.js:98:30)
+      at C:\Program Files (x86)\Yarn\lib\cli.js:116:14
+      at new Promise (<anonymous>)
+      at new F (C:\Program Files (x86)\Yarn\lib\cli.js:23451:28)
+      at Object.<anonymous> (C:\Program Files (x86)\Yarn\lib\cli.js:95:12)
+      at Object.run (C:\Program Files (x86)\Yarn\lib\cli.js:40599:19)
+      at run (C:\Program Files (x86)\Yarn\lib\cli.js:89113:20)

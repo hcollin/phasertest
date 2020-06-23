@@ -16,11 +16,12 @@ export default function objectBuilder(config: ObjectConfiguration): GeneralObjec
    
     const Factory = ObjectFactories.get(config.target);
     if (Factory) {
+        const m = config.multiplier > 1 ? config.multiplier : 0;
         config.coords.forEach((coord: [number, number]) => {
             const sConf: SingleObjectConfiguration = {
                 target: config.target,
-                x: coord[0],
-                y: coord[1],
+                x: coord[0] * m,
+                y: coord[1] * m,
                 config: config.config
             };
             objects.push(Factory(sConf));

@@ -52,39 +52,32 @@ export const LEVEL_TestLevel: LevelConfiguration = {
             json: "assets/atlasses/CrystalBall.json"
         },
         {
-            id: "wall-blue",
+            id: "white-tiles",
             type: AssetType.IMAGE,
-            filename: "assets/sprites/whitewall.png",
-        },
-        {
-            id: "map-test-level",
+            filename: "assets/atlasses/whiteTiles.png"
+        },{
+            id: "white-tile-map",
             type: AssetType.TILEMAPJSON,
-            json: "assets/json/testlevel.json",
-            tileImages: "assets/json/WhiteSpaceTiles.json",
-        }
+            json: "assets/json/testlevel2.json",
+            tileImages: "whiteTiles"
+        },
     ],
     objects: [
         {
             target: GameObjectType.CRYSTAL,
-            coords: [[1600,400], [1700, 200], [1900, 600], [2300, 700], [2500, 300]],
+            multiplier: 32,
+            coords: [[35,3.5], [38, 21], [75, 3.5], [77, 12], [99, 3.5], [105,20], [121,3], [124,5], [118,22]],
         },
-        {
-            target: GameObjectType.WALL,
-            coords: [[1200, 400]],
-            config: {
-                width: 32,
-                height: 400
-            }
-        }
     ],
     tilemaps: [
         {
-            tilemap: "map-test-level",
-        }
+            tilemap: "white-tile-map",
+            tiles: "white-tiles"
+        },
     ],
-    finishLine: 3000,
+    finishLine: 6600,
     backgroundMusic: "audio-music-trance",
-    playerStartX: 100,
+    playerStartX: 32*4,
     playerStartY: 400,
     name: "Test level",
     backgroundImages: [

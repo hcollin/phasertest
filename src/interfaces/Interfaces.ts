@@ -110,6 +110,7 @@ export interface BackgroundImageConfiguration {
 export interface ObjectConfiguration {
     target: GameObjectType;
     coords: [number, number][];
+    multiplier?: number;
     config?: Record<string, any>;
 }
 
@@ -122,6 +123,7 @@ export interface SingleObjectConfiguration {
 
 export interface TileMapConfiguration {
     tilemap: string;
+    tiles: string;
 }
 
 export enum AssetType {

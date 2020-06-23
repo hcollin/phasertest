@@ -44,8 +44,20 @@ export const LEVEL_DungeonLevel: LevelConfiguration = {
             id: "dungeon-map",
             type: AssetType.TILEMAPJSON,
             json: "assets/json/dungeonmap.json",
-            tileImages: "assets/atlasses/DungeonTileSet.png"
-        }
+            tileImages: "DungeonTileSet"
+        },
+        {
+            id: "white-tiles",
+            type: AssetType.IMAGE,
+            filename: "assets/atlasses/whiteTiles.png"
+        },{
+            id: "white-tile-map",
+            type: AssetType.TILEMAPJSON,
+            json: "assets/json/testlevel2.json",
+            tileImages: "whiteTiles"
+        },
+
+
     ],
     objects: [
         {
@@ -56,10 +68,15 @@ export const LEVEL_DungeonLevel: LevelConfiguration = {
     ],
     tilemaps: [
         {
-            tilemap: "dungeon-map",
-        }
+            tilemap: "white-tile-map",
+            tiles: "white-tiles"
+        },
+        // {
+        //     tilemap: "dungeon-map",
+        //     tiles: "dungeon-tiles"
+        // }
     ],
-    finishLine: 2800,
+    finishLine: 6100,
     backgroundMusic: "audio-music-escapism",
     playerStartX: 100,
     playerStartY: 400,
