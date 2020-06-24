@@ -1,6 +1,8 @@
 import { GameObject } from "../interfaces/GameObject";
 import { playerData } from "../data/playerData";
 import { GameLevelSceneInterface } from "../interfaces/Level";
+import { LevelSceneInterface, GeneralObject, HudObject, HudSceneInterface, PlayerDataUpdate } from "../interfaces/Interfaces";
+import Events from "../events";
 
 
 
@@ -13,7 +15,7 @@ interface BarOptions {
     fillStyle: any;
 }
 
-interface BarObject extends GameObject {
+interface BarObject extends HudObject {
     action: (action: string, data: any) => void;
 }
 
@@ -22,17 +24,15 @@ export default function Bar(opts: BarOptions): BarObject {
     let bar: Phaser.GameObjects.Graphics;
     let rect: Phaser.Geom.Rectangle;
 
-    function preload(scene: GameLevelSceneInterface) { }
-
-    function create(scene: GameLevelSceneInterface) {
+    function create(scene: HudSceneInterface) {
         rect = new Phaser.Geom.Rectangle(opts.x, opts.y, opts.width, opts.height);
         bar = scene.add.graphics({ fillStyle: opts.fillStyle })
-        
+
         bar.fillRectShape(rect);
         bar.setScrollFactor(0);
     }
 
-    function update(scene: GameLevelSceneInterface) {
+    function update(scene: HudSceneInterface) {
 
     }
 
@@ -45,16 +45,22 @@ export default function Bar(opts: BarOptions): BarObject {
     }
 
     return {
-        preload,
         create,
         update,
         action
     }
 }
 
-export function HealthBar(): GameObject {
+export function HealthBar(): HudObject {
 
     let oldHealth = 0;
+    let shouldUpdate = false;
+    
+    let playerData: PlayerDataUpdate = {
+        health: 100,
+        points: 0,
+    }
+
     const barBg = Bar({
         x: 8,
         y: 8,
@@ -71,37 +77,35 @@ export function HealthBar(): GameObject {
         fillStyle: { color: 0xff0000, alpha: 0.7 }
     });
 
-    function preload(scene: GameLevelSceneInterface) {
-        barBg.preload(scene);
-        health.preload(scene);
-    }
-    function create(scene: GameLevelSceneInterface) {
+    
+    function create(scene: HudSceneInterface) {
         barBg.create(scene);
         health.create(scene);
+        
+        Events.on<PlayerDataUpdate>("playerUpdate", (data: PlayerDataUpdate) => {
+            playerData = {...data};
+            shouldUpdate = true;
+
+        });
     }
 
 
-    function update(scene: GameLevelSceneInterface) {
-        const status = playerData.getStatus();
-        if (oldHealth !== status.health) {
-            const healthPerc = status.health / 100;
-            oldHealth = status.health;
-            if (status.health >= 0) {
+    function update(scene: HudSceneInterface) {
+       
+        if(shouldUpdate) {
+            const healthPerc = playerData.health / 100;
+            if (playerData.health >= 0) {
                 health.action("rescale", [healthPerc, 1]);
             }
+            shouldUpdate = false;
         }
-
 
 
         barBg.update(scene);
         health.update(scene);
-
-
-
     }
 
     return {
-        preload,
         create,
         update
     }

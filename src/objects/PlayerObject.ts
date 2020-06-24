@@ -1,6 +1,7 @@
-import { PlayerObject, GameObjectType, LevelSceneInterface, PlayerShapeObject, PlayerLevelStatus, LEVELSTATUS, DEPTHLEVEL } from "../interfaces/Interfaces";
+import { PlayerObject, GameObjectType, LevelSceneInterface, PlayerShapeObject, PlayerLevelStatus, LEVELSTATUS, DEPTHLEVEL, PlayerDataUpdate } from "../interfaces/Interfaces";
 import UserConfigs from "../data/UserConfigs";
 import collCategory from "./CollisionCategories";
+import Events from "../events";
 
 
 interface PlayerSoundEffects {
@@ -10,6 +11,8 @@ interface PlayerSoundEffects {
     damage: Phaser.Sound.BaseSound|Phaser.Sound.WebAudioSound|Phaser.Sound.HTML5AudioSound|null;
 
 }
+
+
 
 export default function createPlayerObject(): PlayerObject {
 
@@ -21,6 +24,7 @@ export default function createPlayerObject(): PlayerObject {
     // private values
     const objectIsStatic = false;
     let health: number = 100;
+    let points: number = 0;
     const shapes: PlayerShapeObject[] = [shapeOne, shapeTwo];
     let currentShapeIndex: number = 0;
 
@@ -182,6 +186,12 @@ export default function createPlayerObject(): PlayerObject {
         // Collision Handler
         sprite.setOnCollide((e) => {
             console.log("PLAYER COLLISION!");
+            health -= 1;
+            const d: PlayerDataUpdate = {
+                health,
+                points,
+            };
+            Events.emit<PlayerDataUpdate>("playerUpdate", d);
         })
         // sprite.setOnCollideActive((e) => {
         //     console.log("ACTIVE COLLISION!", e);

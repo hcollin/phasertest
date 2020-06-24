@@ -1,15 +1,16 @@
 import 'phaser';
 
-import LevelSelectorScene from './scenes/LevelSelector';
-import LoadingScreen from './scenes/LoadingScreen';
-import TestScene from './scenes/TestScene';
+// import LevelSelectorScene from './scenes/LevelSelector';
+// import LoadingScreen from './scenes/LoadingScreen';
+// import TestScene from './scenes/TestScene';
 import { LEVEL_TestLevel } from './levels/testLevel';
 import LevelScene from './scenes/LevelScene';
-import { LEVEL_DungeonLevel } from './levels/dungeonlevel';
+import HudScene from './scenes/HudScene';
+
+// import { LEVEL_DungeonLevel } from './levels/dungeonlevel';
 
 const w = 1440;
 const h = Math.round(1440 / 1.7777777);
-
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -39,7 +40,7 @@ const config: Phaser.Types.Core.GameConfig = {
         }
     },
     // scene: [LoadingScreen, LevelSelectorScene]
-    // scene: TestScene
+    // scene: [HudScene]
 };
 
 
@@ -47,6 +48,7 @@ const game = new Phaser.Game(config);
 
 // game.scene.add(LEVEL_DungeonLevel.id, LevelScene, true, LEVEL_DungeonLevel);
 game.scene.add(LEVEL_TestLevel.id, LevelScene, true, LEVEL_TestLevel);
+game.scene.add("HudScene", HudScene, true, {levelId: LEVEL_TestLevel.id});
 
 
 

@@ -116,13 +116,12 @@ export default class LevelScene extends Phaser.Scene implements LevelSceneInterf
 
         // Tilemap
         this.settings.tilemaps.forEach((tm: TileMapConfiguration) => {
-            
+
             const map = this.make.tilemap({
                 key: tm.tilemap,
             });
 
             const tilesets: Phaser.Tilemaps.Tileset[] = map.tilesets.map((tl: Phaser.Tilemaps.Tileset) => {
-
                 const tiles = map.addTilesetImage(tl.name, tm.tiles);
                 return tiles;
             });

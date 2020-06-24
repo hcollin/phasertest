@@ -3,6 +3,13 @@
 
 // Objects that populate the level
 
+
+export interface HudObject {
+    create: (scene: HudSceneInterface) => void;
+    update: (scene: HudSceneInterface, time?: number, delta?: number) => void;
+    preload?: (scene: HudSceneInterface) => void;
+}
+
 export interface GeneralObject {
     objectIsStatic: boolean;
     myType: GameObjectType;
@@ -71,6 +78,15 @@ export interface PlayerShapeObject {
     movementVelocity: number;
     cameraSpeed: number;
     name: string;
+}
+
+export interface PlayerDataUpdate {
+    health: number;
+    points: number;
+}
+
+export interface HudSceneInterface extends Phaser.Scene {
+
 }
 
 
